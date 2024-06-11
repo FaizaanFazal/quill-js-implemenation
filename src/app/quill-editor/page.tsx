@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef } from 'react';
-import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import * as QuillTableUI from 'quill-table-ui'
+import TableUI from 'quill-table-ui';
+import Quill from 'quill';
+import { Delta } from 'quill/core';
 
 interface QuillEditorProps {
     value: string;
@@ -10,20 +11,21 @@ interface QuillEditorProps {
     readOnly: boolean;
 
 }
+Quill.register({
+    'modules/tableUI': TableUI
+}, true);
 
-Quill.register({ 'modules/tableUI': QuillTableUI.default }, true)
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
     const editorRef = useRef<any>();
 
     useEffect(() => {
         if (editorRef.current && editorRef.current instanceof HTMLElement) {
+                      
             const quill = new Quill(editorRef.current, {
                 readOnly: readOnly,
                 theme: 'snow',
-                modules: {
-                    table: true,
-                    tableUI: true,
+                modules: {      
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
                         ['blockquote', 'code-block'],
@@ -37,14 +39,17 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
                         [{ 'color': [] }, { 'background': [] }],
                         [{ 'font': [] }],
                         [{ 'align': [] }],
-                        ['table'],
+                        [{ 'table': true }],
                         ['clean']
                     ],  
+                    table: true,
+                    tableUI: true,
+                
                 },
                 placeholder: 'Compose an epic...',
 
             });
-            
+        
 
             if (value) {
                 quill.clipboard.dangerouslyPasteHTML(value);
