@@ -2,6 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+.editor-container h1 {
+  @apply text-4xl font-bold;
+}
+
+.editor-container h2 {
+  @apply text-3xl font-bold;
+}
+
+.editor-container h3 {
+  @apply text-2xl font-bold;
+}
+.editor-container h4 {
+  @apply text-xl font-bold;
+}
+
+.editor-container h5 {
+  @apply text-lg font-bold;
+}
+.editor-container h6 {
+  @apply text-sm font-bold;
+}
+.editor-container ol {
+  @apply list-decimal ml-6;
+}
+
+.editor-container ul {
+  @apply list-disc ml-6;
+}
+
+.editor-container li {
+  @apply mb-2;
+}
+
+.editor-container blockquote {
+  @apply border-l-4 border-[#ccc] !pl-4  !my-1;
+}
+
+.editor-container .ql-align-center {
+  @apply text-center;
+}
+
+.editor-container .ql-align-right {
+  @apply text-right;
+}
+
+.editor-container .ql-align-justify {
+  @apply text-justify;
+}
+
+/* Add more styles as needed */
+
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
