@@ -7,7 +7,7 @@ const HomePage: React.FC = () => {
   const [editorContent, setEditorContent] = useState<any>('');
 
   const handleEditorChange = (content: any) => {
-    console.log(JSON.stringify(content))
+   // console.log(JSON.stringify(content))
     setEditorContent(content);
   };
 
@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
     allowBackgroundClasses: true, // Allow adding CSS classes for background attribute
 
     urlSanitizer: (url: any) => {
-      return url; // return sanitized URL
+      return url; // return sanitized URL todo
     },
 
     customCssClasses: (op: DeltaInsertOp) => {

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import * as QuillTableUI from 'quill-table-ui'
 
 interface QuillEditorProps {
     value: string;
@@ -9,6 +10,8 @@ interface QuillEditorProps {
     readOnly: boolean;
 
 }
+
+Quill.register({ 'modules/tableUI': QuillTableUI.default }, true)
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
     const editorRef = useRef<any>();
@@ -19,25 +22,29 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
                 readOnly: readOnly,
                 theme: 'snow',
                 modules: {
+                    table: true,
+                    tableUI: true,
                     toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],        
+                        ['bold', 'italic', 'underline', 'strike'],
                         ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],         
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],      
-                        [{ 'indent': '-1'}, { 'indent': '+1' }],          
-                        [{ 'direction': 'rtl' }],                     
-                        [{ 'size': ['small', false, 'large', 'huge'] }], 
+                        ['link', 'image', 'video', 'formula'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+                        [{ 'script': 'sub' }, { 'script': 'super' }],
+                        [{ 'indent': '-1' }, { 'indent': '+1' }],
+                        [{ 'direction': 'rtl' }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
                         [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],      
+                        [{ 'color': [] }, { 'background': [] }],
                         [{ 'font': [] }],
                         [{ 'align': [] }],
-                        ['clean']                                    
-                      ]
+                        ['table'],
+                        ['clean']
+                    ],  
                 },
                 placeholder: 'Compose an epic...',
 
             });
+            
 
             if (value) {
                 quill.clipboard.dangerouslyPasteHTML(value);
