@@ -9,9 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@botom/quill-resize-module": "^2.0.1",
     "next": "14.2.3",
+    "parchment": "^3.0.0",
     "quill": "^2.0.2",
+    "quill-better-table": "^1.2.10",
     "quill-delta-to-html": "^0.12.1",
+    "quill-image-resize-module": "^3.0.0",
+    "quill-table": "^1.0.0",
     "quill-table-ui": "^1.0.7",
     "react": "^18",
     "react-dom": "^18"
