@@ -2,19 +2,12 @@
 import { useEffect, useRef } from 'react';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.core.css';
-// import TableUI from 'quill-table-ui';
 import Quill from 'quill';
 import { Delta } from 'quill/core';
 import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
-import 'quill-better-table/dist/quill-better-table.css';
-import 'quill-better-table';
-// import QuillTableUI from 'quill-table-ui';
-// import 'quill-table-ui/dist/index.css';
 
-interface TableUIModule {
-    insertTable: () => void;
-}
+
 interface QuillEditorProps {
     value: string;
     onChange: (content: string) => void;
@@ -78,13 +71,14 @@ class PlainClipboard extends Clipboard {
 }
 
 Quill.register('modules/clipboard', PlainClipboard, true);
-// Quill.register('modules/tableUI', QuillTableUI, true);
 Quill.register("modules/resize", ResizeModule);
 
 //Quill.register('modules/clipboard', PlainClipboard, true);
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
     const editorRef = useRef<any>();
+    const quillEditor = useRef<Quill | null>(null);
+
     useEffect(() => {
         if (editorRef.current && editorRef.current instanceof HTMLElement) {
 
@@ -93,23 +87,23 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
                 theme: 'snow',
                 modules: {
                     table: true,
-                    toolbar: [
-                        
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-                        [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'indent': '-1' }, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ],
-               
+                    toolbar:  [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            ['blockquote', 'code-block'],
+                            ['link', 'image', 'video', 'formula'],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+                            [{ 'script': 'sub' }, { 'script': 'super' }],
+                            [{ 'indent': '-1' }, { 'indent': '+1' }],
+                            [{ 'direction': 'rtl' }],
+                            [{ 'size': ['small', false, 'large', 'huge'] }],
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'font': [] }],
+                            [{ 'align': [] }],
+                            [{'table':[]}],
+                            ['clean']
+                        ],               
+
                     resize: {
                         locale: {
                             center: "center",
@@ -120,13 +114,6 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
 
             });
 
-            const toolbar = quill.getModule('toolbar');
-            if (toolbar) {
-                const tableButton = (toolbar as any).container.querySelector('.ql-table');
-                if (tableButton) {
-                    tableButton.innerHTML = 'Table';
-                }
-            }
 
 
             if (value) {
@@ -159,11 +146,13 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
 
             quill.on('text-change', () => {
                 const content = quill.getContents();
-                console.log(content)
                 onChange(content as any);
             });
             editorRef.current = quill
+
         }
+
+
         return () => {
             if (editorRef.current && editorRef.current.destroy) {
                 editorRef.current.destroy();

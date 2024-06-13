@@ -7,7 +7,7 @@ const HomePage: React.FC = () => {
   const [editorContent, setEditorContent] = useState<any>('');
 
   const handleEditorChange = (content: any) => {
-   // console.log(JSON.stringify(content))
+    console.log(content)
     setEditorContent(content);
   };
 
@@ -80,7 +80,6 @@ const HomePage: React.FC = () => {
 
   var converter = new QuillDeltaToHtmlConverter(editorContent.ops, cfg);
   var html = converter.convert();
-  console.log("hello", html);
 
   return (
     <div className='min-h-screen p-5 m-5'>
