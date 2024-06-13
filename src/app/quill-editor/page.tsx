@@ -106,7 +106,10 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
 
                     resize: {
                         locale: {
-                            center: "center",
+                            floatLeft: "Left",
+                            floatRight: "Right",
+                            center: "Center",
+                            restore: "Restore",
                         },
                     },
                 },
@@ -145,6 +148,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
             // });
 
             quill.on('text-change', () => {
+                console.log("changed")
                 const content = quill.getContents();
                 onChange(content as any);
             });
