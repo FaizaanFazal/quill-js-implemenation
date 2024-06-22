@@ -3,10 +3,10 @@ import { useEffect, useRef } from 'react';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.core.css';
 import Quill from 'quill';
-import { Delta } from 'quill/core';
+import { Delta, Parchment } from 'quill/core';
 import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
-
+import BlotFormatter from 'quill-blot-formatter';
 
 interface QuillEditorProps {
     value: string;
@@ -18,6 +18,53 @@ interface ConvertParams {
     html?: string;
     text?: string;
 }
+
+// Define custom Parchment Attributors for image styling
+const ImageFormatAttributesList = [
+    'alt', 'height', 'width', 'style', 'data-align', 'float', 'margin'
+  ];
+  
+  const BaseImageFormat = Quill.import('formats/image') as any;
+  
+  class ImageFormat extends BaseImageFormat {
+    static blotName = 'image';
+    static tagName = 'img';
+  
+    static create(value: any) {
+      const node = super.create(value);
+      Object.keys(value).forEach((attribute) => {
+        if (ImageFormatAttributesList.includes(attribute)) {
+          node.setAttribute(attribute, value[attribute]);
+        }
+      });
+      return node;
+    }
+  
+    static formats(domNode: HTMLElement) {
+      return ImageFormatAttributesList.reduce((formats: { [key: string]: any }, attribute) => {
+        if (domNode.hasAttribute(attribute)) {
+          formats[attribute] = domNode.getAttribute(attribute);
+        }
+        return formats;
+      }, {});
+    }
+  
+    format(name: string, value: any) {
+      if (ImageFormatAttributesList.indexOf(name) > -1) {
+        if (value) {
+          this.domNode.setAttribute(name, value);
+        } else {
+          this.domNode.removeAttribute(name);
+        }
+      } else {
+        super.format(name, value);
+      }
+    }
+  }
+  
+  Quill.register(ImageFormat, true);
+  
+
 
 class PlainClipboard extends Clipboard {
     container: HTMLElement;
@@ -34,6 +81,7 @@ class PlainClipboard extends Clipboard {
                 const range = this.quill.getSelection(true);
                 this.quill.insertEmbed(range.index, 'image', img.src, Quill.sources.USER);
                 this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
+                this.quill.formatText(range.index, 1, 'align', img.style.float || 'center', Quill.sources.USER);
                 this.quill.update(Quill.sources.SILENT);
                 return new Delta(); // Return an empty Delta to prevent further processing
             }
@@ -49,6 +97,7 @@ class PlainClipboard extends Clipboard {
                     const range = this.quill.getSelection(true);
                     this.quill.insertEmbed(range.index, 'image', url, Quill.sources.USER);
                     this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
+                    this.quill.formatText(range.index, 1, 'align', 'center', Quill.sources.USER);
                     this.quill.update(Quill.sources.SILENT);
                 } else {
                     // If the URL is a regular link
@@ -72,13 +121,11 @@ class PlainClipboard extends Clipboard {
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 Quill.register("modules/resize", ResizeModule);
-
+Quill.register('modules/blotFormatter', BlotFormatter);
 //Quill.register('modules/clipboard', PlainClipboard, true);
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
     const editorRef = useRef<any>();
-    const quillEditor = useRef<Quill | null>(null);
-
     useEffect(() => {
         if (editorRef.current && editorRef.current instanceof HTMLElement) {
 
@@ -87,31 +134,27 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
                 theme: 'snow',
                 modules: {
                     table: true,
-                    toolbar:  [
-                            ['bold', 'italic', 'underline', 'strike'],
-                            ['blockquote', 'code-block'],
-                            ['link', 'image', 'video', 'formula'],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-                            [{ 'script': 'sub' }, { 'script': 'super' }],
-                            [{ 'indent': '-1' }, { 'indent': '+1' }],
-                            [{ 'direction': 'rtl' }],
-                            [{ 'size': ['small', false, 'large', 'huge'] }],
-                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'font': [] }],
-                            [{ 'align': [] }],
-                            [{'table':[]}],
-                            ['clean']
-                        ],               
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image', 'video', 'formula'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+                        [{ 'script': 'sub' }, { 'script': 'super' }],
+                        [{ 'indent': '-1' }, { 'indent': '+1' }],
+                        [{ 'direction': 'rtl' }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'font': [] }],
+                        [{ 'align': [] }],
+                        [{ 'table': [] }],
+                        ['clean']
+                    ],
 
-                    resize: {
-                        locale: {
-                            floatLeft: "Left",
-                            floatRight: "Right",
-                            center: "Center",
-                            restore: "Restore",
-                        },
-                    },
+                    // resize: {},
+                    blotFormatter: {
+                        // see config options below
+                    }
                 },
                 placeholder: 'Compose an epic...',
 
@@ -122,30 +165,6 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
             if (value) {
                 quill.clipboard.dangerouslyPasteHTML(value);
             }
-            // quill.on('paste', (event: ClipboardEvent) => {
-            //     event.preventDefault();
-
-            //     const clipboardData = event.clipboardData;
-            //     if (!clipboardData) {
-            //         return;
-            //     }
-            //     let pastedText = clipboardData.getData('text/plain');
-            //     let pastedHTML = clipboardData.getData('text/html');
-            //     if (pastedText) {
-            //         pastedText += "end";
-            //         const range = quill.getSelection();
-            //         if (range) {
-            //             quill.insertText(range.index, pastedText);
-            //         }
-            //     } else if (pastedHTML) {
-
-            //         pastedHTML += "end";
-            //         const range = quill.getSelection();
-            //         if (range) {
-            //             quill.clipboard.dangerouslyPasteHTML(range.index, pastedHTML);
-            //         }
-            //     }
-            // });
 
             quill.on('text-change', () => {
                 console.log("changed")
@@ -153,9 +172,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
                 onChange(content as any);
             });
             editorRef.current = quill
-
         }
-
 
         return () => {
             if (editorRef.current && editorRef.current.destroy) {
