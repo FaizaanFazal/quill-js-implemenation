@@ -19,50 +19,50 @@ interface ConvertParams {
     text?: string;
 }
 
-// Define custom Parchment Attributors for image styling
+
 const ImageFormatAttributesList = [
-    'alt', 'height', 'width', 'style', 'data-align', 'float', 'margin'
-  ];
-  
-  const BaseImageFormat = Quill.import('formats/image') as any;
-  
-  class ImageFormat extends BaseImageFormat {
-    static blotName = 'image';
-    static tagName = 'img';
-  
-    static create(value: any) {
-      const node = super.create(value);
-      Object.keys(value).forEach((attribute) => {
-        if (ImageFormatAttributesList.includes(attribute)) {
-          node.setAttribute(attribute, value[attribute]);
-        }
-      });
-      return node;
-    }
-  
-    static formats(domNode: HTMLElement) {
-      return ImageFormatAttributesList.reduce((formats: { [key: string]: any }, attribute) => {
-        if (domNode.hasAttribute(attribute)) {
-          formats[attribute] = domNode.getAttribute(attribute);
-        }
-        return formats;
-      }, {});
-    }
-  
-    format(name: string, value: any) {
-      if (ImageFormatAttributesList.indexOf(name) > -1) {
-        if (value) {
-          this.domNode.setAttribute(name, value);
-        } else {
-          this.domNode.removeAttribute(name);
-        }
-      } else {
-        super.format(name, value);
+  'alt', 'height', 'width', 'style', 'data-align'
+];
+
+const BaseImageFormat = Quill.import('formats/image') as any;
+
+class ImageFormat extends BaseImageFormat {
+  static blotName = 'image';
+  static tagName = 'img';
+
+  static create(value: any) {
+    const node = super.create(value);
+    Object.keys(value).forEach((attribute) => {
+      if (ImageFormatAttributesList.includes(attribute)) {
+        node.setAttribute(attribute, value[attribute]);
       }
+    });
+    return node;
+  }
+
+  static formats(domNode: HTMLElement) {
+    return ImageFormatAttributesList.reduce((formats: { [key: string]: any }, attribute) => {
+      if (domNode.hasAttribute(attribute)) {
+        formats[attribute] = domNode.getAttribute(attribute);
+      }
+      return formats;
+    }, {});
+  }
+
+  format(name: string, value: any) {
+    if (ImageFormatAttributesList.indexOf(name) > -1) {
+      if (value) {
+        this.domNode.setAttribute(name, value);
+      } else {
+        this.domNode.removeAttribute(name);
+      }
+    } else {
+      super.format(name, value);
     }
   }
-  
-  Quill.register(ImageFormat, true);
+}
+
+Quill.register(ImageFormat, true);
   
 
 
@@ -169,6 +169,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
             quill.on('text-change', () => {
                 console.log("changed")
                 const content = quill.getContents();
+                console.log("content", content)
                 onChange(content as any);
             });
             editorRef.current = quill

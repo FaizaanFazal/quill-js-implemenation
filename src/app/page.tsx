@@ -7,15 +7,18 @@ const HomePage: React.FC = () => {
   const [editorContent, setEditorContent] = useState<any>('');
 
   const handleEditorChange = (content: any) => {
-    console.log(content)
+    console.log(content);
     setEditorContent(content);
   };
 
+
+interface ImageAttributes {
+  'data-align'?: string;
+}
   // Define your configuration options
   const cfg = {
     paragraphTag: 'div', // Use 'div' instead of the default 'p' tag
     encodeHtml: false, // Do not encode HTML characters
-    classPrefix: 'my-ql', // Prefix class names with 'my-ql'
     inlineStyles: false, // Use classes instead of inline styles
     multiLineBlockquote: false, // Do not consolidate multiple blockquotes
     multiLineHeader: false, // Do not consolidate multiple headers
@@ -36,7 +39,7 @@ const HomePage: React.FC = () => {
       if (formats.italic) classes.push('italic');
       if (formats.underline) classes.push('underline');
       if (formats.strike) classes.push('line-through');
-      if (formats.blockquote) classes.push('border-l-4 border-[#ccc] !px-4  !my-1');
+      if (formats.blockquote) classes.push('border-l-4 border-[#ccc] !px-4 !my-1');
       if (formats['code-block']) classes.push('bg-black text-white p-2 rounded');
       if (formats.link) classes.push('text-blue-500 underline');
       if (formats.image) classes.push('max-w-full h-auto');
@@ -56,8 +59,8 @@ const HomePage: React.FC = () => {
         else if (formats.header === 2) classes.push('text-3xl');
         else if (formats.header === 3) classes.push('text-2xl');
         else if (formats.header === 4) classes.push('text-xl');
-        else if (formats.header === 5) classes.push('text-lg ');
-        else if (formats.header === 6) classes.push('text-base ');
+        else if (formats.header === 5) classes.push('text-lg');
+        else if (formats.header === 6) classes.push('text-base');
       }
       if (formats.color) classes.push(`text-${(formats.color as string).slice(1)}`);
       if (formats.background) classes.push(`bg-${(formats.background as string).slice(1)}`);
@@ -67,8 +70,22 @@ const HomePage: React.FC = () => {
         else if (formats.align === 'right') classes.push('text-right');
         else if (formats.align === 'justify') classes.push('text-justify');
       }
+
       return classes.join(' ');
     },
+
+    customAttributes: (op: DeltaInsertOp) => {
+      const attributes: any = {};
+      if (op.insert && typeof op.insert === 'object' && 'image' in op.insert) {
+        const imageAttributes = op.attributes  as ImageAttributes;
+        if (imageAttributes['data-align']) {
+          const alignClass = imageAttributes['data-align'] === 'center' ? 'mx-auto' : '';
+          attributes['class'] = alignClass;
+        }
+      }
+      return attributes;
+    },
+    
 
     customTag: (format: string, op: DeltaInsertOp) => {
       if (format === 'italic') {
@@ -78,8 +95,8 @@ const HomePage: React.FC = () => {
     }
   };
 
-  var converter = new QuillDeltaToHtmlConverter(editorContent.ops, cfg);
-  var html = converter.convert();
+  const converter = new QuillDeltaToHtmlConverter(editorContent.ops, cfg);
+  const html = converter.convert();
 
   return (
     <div className='min-h-screen p-5 m-5'>
