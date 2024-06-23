@@ -169,7 +169,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
             quill.on('text-change', () => {
                 console.log("changed")
                 const content = quill.getContents();
-                console.log("content", content)
+                console.log("content", content. ops[0]?.attributes?.['data-align'])
                 onChange(content as any);
             });
             editorRef.current = quill

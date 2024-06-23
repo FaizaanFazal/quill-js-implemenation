@@ -77,9 +77,7 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-img{
-  display: inline-block;
-}
+
 
 @layer utilities {
   .text-balance {

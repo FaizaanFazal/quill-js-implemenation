@@ -11,10 +11,6 @@ const HomePage: React.FC = () => {
     setEditorContent(content);
   };
 
-
-interface ImageAttributes {
-  'data-align'?: string;
-}
   // Define your configuration options
   const cfg = {
     paragraphTag: 'div', // Use 'div' instead of the default 'p' tag
@@ -41,6 +37,8 @@ interface ImageAttributes {
       if (formats.strike) classes.push('line-through');
       if (formats.blockquote) classes.push('border-l-4 border-[#ccc] !px-4 !my-1');
       if (formats['code-block']) classes.push('bg-black text-white p-2 rounded');
+      if (formats['data-align']==='center') classes.push('mx-auto');
+      if (formats['data-align']==='right') classes.push('ml-auto');
       if (formats.link) classes.push('text-blue-500 underline');
       if (formats.image) classes.push('max-w-full h-auto');
       if (formats.video) classes.push('max-w-full h-auto');
@@ -74,18 +72,25 @@ interface ImageAttributes {
       return classes.join(' ');
     },
 
-    customAttributes: (op: DeltaInsertOp) => {
-      const attributes: any = {};
-      if (op.insert && typeof op.insert === 'object' && 'image' in op.insert) {
-        const imageAttributes = op.attributes  as ImageAttributes;
-        if (imageAttributes['data-align']) {
-          const alignClass = imageAttributes['data-align'] === 'center' ? 'mx-auto' : '';
-          attributes['class'] = alignClass;
-        }
-      }
-      return attributes;
-    },
+    // customAttributes: (op: DeltaInsertOp) => {
+    //   console.log('op.attributes:', op.attributes);
+    //   const attributes: any = {};
+      
+    //   if (op.insert && typeof op.insert === 'object' && 'image' in op.insert) {
+    //     const imageAttributes = op.attributes || {};
+    //     const dataAlign = imageAttributes['data-align'];
     
+    //     if (dataAlign && dataAlign === 'center') {
+    //       attributes['class'] = 'mx-auto';
+    //     }
+    //   }
+      
+    //   console.log('customAttributes:', attributes); // Check what attributes are being returned
+      
+    //   return attributes;
+    // }
+    // ,
+
 
     customTag: (format: string, op: DeltaInsertOp) => {
       if (format === 'italic') {
