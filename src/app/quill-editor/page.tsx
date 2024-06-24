@@ -7,16 +7,18 @@ import { Delta, Parchment } from 'quill/core';
 import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
 import BlotFormatter from 'quill-blot-formatter';
+import QuillBetterTable from 'quill-better-table'
+
 
 interface QuillEditorProps {
-    value: string;
-    onChange: (content: string) => void;
-    readOnly: boolean;
+  value: string;
+  onChange: (content: string) => void;
+  readOnly: boolean;
 
 }
 interface ConvertParams {
-    html?: string;
-    text?: string;
+  html?: string;
+  text?: string;
 }
 
 
@@ -63,131 +65,155 @@ class ImageFormat extends BaseImageFormat {
 }
 
 Quill.register(ImageFormat, true);
-  
+
 
 
 class PlainClipboard extends Clipboard {
-    container: HTMLElement;
-    constructor(quill: Quill, options?: any) {
-        super(quill, options);
-        this.container = quill.container;
+  container: HTMLElement;
+  constructor(quill: Quill, options?: any) {
+    super(quill, options);
+    this.container = quill.container;
+  }
+  convert({ html, text }: ConvertParams): Delta {
+    if (typeof html === 'string') {
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = html;
+      const img = tempContainer.querySelector('img');
+      if (img && img.src) {
+        const range = this.quill.getSelection(true);
+        this.quill.insertEmbed(range.index, 'image', img.src, Quill.sources.USER);
+        this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
+        this.quill.formatText(range.index, 1, 'align', img.style.float || 'center', Quill.sources.USER);
+        this.quill.update(Quill.sources.SILENT);
+        return new Delta(); // Return an empty Delta to prevent further processing
+      }
     }
-    convert({ html, text }: ConvertParams): Delta {
-        if (typeof html === 'string') {
-            const tempContainer = document.createElement('div');
-            tempContainer.innerHTML = html;
-            const img = tempContainer.querySelector('img');
-            if (img && img.src) {
-                const range = this.quill.getSelection(true);
-                this.quill.insertEmbed(range.index, 'image', img.src, Quill.sources.USER);
-                this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
-                this.quill.formatText(range.index, 1, 'align', img.style.float || 'center', Quill.sources.USER);
-                this.quill.update(Quill.sources.SILENT);
-                return new Delta(); // Return an empty Delta to prevent further processing
-            }
+
+    if (typeof text === 'string') {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const match = urlRegex.exec(text);
+      if (match) {
+        const url = match[0];
+        if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+          // If the URL is an image
+          const range = this.quill.getSelection(true);
+          this.quill.insertEmbed(range.index, 'image', url, Quill.sources.USER);
+          this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
+          this.quill.formatText(range.index, 1, 'align', 'center', Quill.sources.USER);
+          this.quill.update(Quill.sources.SILENT);
+        } else {
+          // If the URL is a regular link
+          const range = this.quill.getSelection(true);
+          this.quill.insertText(range.index, url, { link: url }, Quill.sources.USER);
+          this.quill.setSelection(range.index + url.length, Quill.sources.SILENT);
+          this.quill.update(Quill.sources.SILENT);
         }
+        return new Delta(); // Return an empty Delta to prevent further processing
+      }
 
-        if (typeof text === 'string') {
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const match = urlRegex.exec(text);
-            if (match) {
-                const url = match[0];
-                if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
-                    // If the URL is an image
-                    const range = this.quill.getSelection(true);
-                    this.quill.insertEmbed(range.index, 'image', url, Quill.sources.USER);
-                    this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
-                    this.quill.formatText(range.index, 1, 'align', 'center', Quill.sources.USER);
-                    this.quill.update(Quill.sources.SILENT);
-                } else {
-                    // If the URL is a regular link
-                    const range = this.quill.getSelection(true);
-                    this.quill.insertText(range.index, url, { link: url }, Quill.sources.USER);
-                    this.quill.setSelection(range.index + url.length, Quill.sources.SILENT);
-                    this.quill.update(Quill.sources.SILENT);
-                }
-                return new Delta(); // Return an empty Delta to prevent further processing
-            }
-
-            // If plain text
-            if (text) {
-                return new Delta().insert(text);
-            }
-        }
-
-        return new Delta();
+      // If plain text
+      if (text) {
+        return new Delta().insert(text);
+      }
     }
+
+    return new Delta();
+  }
 }
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 Quill.register("modules/resize", ResizeModule);
 Quill.register('modules/blotFormatter', BlotFormatter);
+Quill.register({ 'modules/better-table': QuillBetterTable }, true)
 //Quill.register('modules/clipboard', PlainClipboard, true);
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
-    const editorRef = useRef<any>();
-    useEffect(() => {
-        if (editorRef.current && editorRef.current instanceof HTMLElement) {
+  const editorRef = useRef<any>();
+  useEffect(() => {
+    if (editorRef.current && editorRef.current instanceof HTMLElement) {
 
-            const quill = new Quill(editorRef.current, {
-                readOnly: readOnly,
-                theme: 'snow',
-                modules: {
-                    table: true,
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-                        [{ 'script': 'sub' }, { 'script': 'super' }],
-                        [{ 'indent': '-1' }, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        [{ 'table': [] }],
-                        ['clean']
-                    ],
+      const quill = new Quill(editorRef.current, {
+        readOnly: readOnly,
+        theme: 'snow',
+        modules: {
+          table: false,
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            ['link', 'image', 'video', 'formula'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+            [{ 'script': 'sub' }, { 'script': 'super' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            [{ 'table': [] }],
+            ['clean']
+          ],
 
-                    // resize: {},
-                    blotFormatter: {
-                        // see config options below
-                    }
-                },
-                placeholder: 'Compose an epic...',
-
-            });
-
-
-
-            if (value) {
-                quill.clipboard.dangerouslyPasteHTML(value);
+          // resize: {},
+          blotFormatter: {
+            // see config options below
+          },
+          'better-table': {
+            operationMenu: {
+              items: {
+                unmergeCells: {
+                  text: 'Another unmerge cells name'
+                }
+              }
             }
+          },
+          keyboard: {
+            bindings: QuillBetterTable.keyboardBindings
+          }
+        },
+        placeholder: 'Compose an epic...',
 
-            quill.on('text-change', () => {
-                console.log("changed")
-                const content = quill.getContents();
-                console.log("content", content. ops[0]?.attributes?.['data-align'])
-                onChange(content as any);
-            });
-            editorRef.current = quill
-        }
+      });
 
-        return () => {
-            if (editorRef.current && editorRef.current.destroy) {
-                editorRef.current.destroy();
-            }
-        };
-    }, []);
 
-    return (
-        <div className='py-4 px-12 w-[100%]'>
-            <div ref={editorRef}>
-            </div>
-        </div>
-    )
+
+      if (value) {
+        quill.clipboard.dangerouslyPasteHTML(value);
+      }
+
+      // Attach an event listener to the insert table button
+      // Attach an event listener to the insert table button
+      const insertTableButton = document.getElementById('insert-table');
+      if (insertTableButton) {
+        insertTableButton.addEventListener('click', () => {
+          const tableModule = quill.getModule('better-table') as unknown as QuillBetterTable;
+          (tableModule as any).insertTable(3, 3);
+        });
+      }
+    
+
+      quill.on('text-change', () => {
+        console.log("changed")
+        const content = quill.getContents();
+        console.log("content", content.ops[0]?.attributes?.['data-align'])
+        onChange(content as any);
+      });
+      editorRef.current = quill
+    }
+
+    return () => {
+      if (editorRef.current && editorRef.current.destroy) {
+        editorRef.current.destroy();
+      }
+    };
+  }, []);
+
+  return (
+    <div className='py-4 px-12 w-[100%]'>
+      <div ref={editorRef}>
+      </div>
+    </div>
+  )
 };
 
 export default QuillEditor;
