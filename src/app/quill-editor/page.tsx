@@ -8,7 +8,10 @@ import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
 import BlotFormatter from 'quill-blot-formatter';
 import QuillBetterTable from 'quill-better-table'
+import 'quill-table-ui/dist/index.css';
+import TableUI from 'quill-table-ui';
 
+const QuillTableUI = require('quill-table-ui').default;
 
 interface QuillEditorProps {
   value: string;
@@ -124,7 +127,10 @@ class PlainClipboard extends Clipboard {
 Quill.register('modules/clipboard', PlainClipboard, true);
 Quill.register("modules/resize", ResizeModule);
 Quill.register('modules/blotFormatter', BlotFormatter);
-Quill.register({ 'modules/better-table': QuillBetterTable }, true)
+// Quill.register({ 'modules/better-table': QuillBetterTable }, true)
+Quill.register({
+  'modules/tableUI': QuillTableUI
+}, true)
 //Quill.register('modules/clipboard', PlainClipboard, true);
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
@@ -136,78 +142,82 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
         readOnly: readOnly,
         theme: 'snow',
         modules: {
-          table: false,
-          toolbar: [
-            ['bold', 'italic', 'underline', 'strike'],
-            ['blockquote', 'code-block'],
-            ['link', 'image', 'video', 'formula'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-            [{ 'script': 'sub' }, { 'script': 'super' }],
-            [{ 'indent': '-1' }, { 'indent': '+1' }],
-            [{ 'direction': 'rtl' }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-            [{ 'table': [] }],
-            ['clean']
-          ],
+          toolbar: {
+            container: [
+              ['bold', 'italic', 'underline', 'strike'],
+              ['blockquote', 'code-block'],
+              ['link', 'image', 'video', 'formula'],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              [{ 'script': 'sub' }, { 'script': 'super' }],
+              [{ 'indent': '-1' }, { 'indent': '+1' }],
+              [{ 'direction': 'rtl' }],
+              [{ 'size': ['small', false, 'large', 'huge'] }],
+              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }],
+              [{ 'align': [] }],
+              ['table'],
+              ['clean']
+            ],
 
-          // resize: {},
-          blotFormatter: {
-            // see config options below
           },
+          // resize: {},
+          blotFormatter: {},
           'better-table': {
             operationMenu: {
-              items: {
-                unmergeCells: {
-                  text: 'Another unmerge cells name'
-                }
-              }
-            }
+              
+            },
           },
-          keyboard: {
-            bindings: QuillBetterTable.keyboardBindings
-          }
+          tableUI: true,
         },
         placeholder: 'Compose an epic...',
 
       });
 
-
-
-      if (value) {
-        quill.clipboard.dangerouslyPasteHTML(value);
-      }
-
-      // Attach an event listener to the insert table button
-      // Attach an event listener to the insert table button
-      const insertTableButton = document.getElementById('insert-table');
-      if (insertTableButton) {
-        insertTableButton.addEventListener('click', () => {
-          const tableModule = quill.getModule('better-table') as unknown as QuillBetterTable;
-          (tableModule as any).insertTable(3, 3);
-        });
-      }
     
+      // document.getElementById('insertTableBtn')?.addEventListener('click', () => {
+      //   const tableNode = document.createElement('table');
+      //   const tbody = document.createElement('tbody');
+      //   for (let i = 0; i < 3; i++) {
+      //     const row = document.createElement('tr');
+      //     for (let j = 0; j < 3; j++) {
+      //       const cell = document.createElement('td');
+      //       cell.textContent = ''; // Empty cell content
+      //       row.appendChild(cell);
+      //     }
+      //     tbody.appendChild(row);
+      //   }
+      //   tableNode.appendChild(tbody);
+      //   const range = quill.getSelection();
+      //   if (range) {
+      //     quill.clipboard.dangerouslyPasteHTML(range.index, tableNode.outerHTML);
+      //   }
+      // });
 
-      quill.on('text-change', () => {
-        console.log("changed")
-        const content = quill.getContents();
-        console.log("content", content.ops[0]?.attributes?.['data-align'])
-        onChange(content as any);
-      });
-      editorRef.current = quill
-    }
 
-    return () => {
-      if (editorRef.current && editorRef.current.destroy) {
-        editorRef.current.destroy();
+        if (value) {
+          quill.clipboard.dangerouslyPasteHTML(value);
+        }
+
+
+        quill.on('text-change', () => {
+          console.log("changed")
+          const content = quill.getContents();
+          console.log("content", content.ops[0]?.attributes?.['data-align'])
+          onChange(content as any);
+        });
+        editorRef.current = quill
       }
-    };
-  }, []);
 
+      return () => {
+        if (editorRef.current && editorRef.current.destroy) {
+          editorRef.current.destroy();
+        }
+      };
+    }, []);
+
+
+    
   return (
     <div className='py-4 px-12 w-[100%]'>
       <div ref={editorRef}>
