@@ -187,5 +187,4 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
     </div>
   )
 };
-
 export default QuillEditor;
