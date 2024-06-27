@@ -1,15 +1,14 @@
 "use client";
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import QuillEditor from './quill-editor/page';
 import { DeltaInsertOp, QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 
 const HomePage: React.FC = () => {
   const [editorContent, setEditorContent] = useState<any>('');
 
-  const handleEditorChange = (content: any) => {
-    console.log(content);
+  const handleEditorChange = useCallback((content: string) => {
     setEditorContent(content);
-  };
+  }, []);
 
   // Define your configuration options
   const cfg = {
@@ -71,26 +70,6 @@ const HomePage: React.FC = () => {
 
       return classes.join(' ');
     },
-
-    // customAttributes: (op: DeltaInsertOp) => {
-    //   console.log('op.attributes:', op.attributes);
-    //   const attributes: any = {};
-      
-    //   if (op.insert && typeof op.insert === 'object' && 'image' in op.insert) {
-    //     const imageAttributes = op.attributes || {};
-    //     const dataAlign = imageAttributes['data-align'];
-    
-    //     if (dataAlign && dataAlign === 'center') {
-    //       attributes['class'] = 'mx-auto';
-    //     }
-    //   }
-      
-    //   console.log('customAttributes:', attributes); // Check what attributes are being returned
-      
-    //   return attributes;
-    // }
-    // ,
-
 
     customTag: (format: string, op: DeltaInsertOp) => {
       if (format === 'italic') {

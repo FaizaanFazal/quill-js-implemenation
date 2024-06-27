@@ -7,11 +7,7 @@ import { Delta, Parchment } from 'quill/core';
 import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
 import BlotFormatter from 'quill-blot-formatter';
-import QuillBetterTable from 'quill-better-table'
-import 'quill-table-ui/dist/index.css';
-import TableUI from 'quill-table-ui';
 
-const QuillTableUI = require('quill-table-ui').default;
 
 interface QuillEditorProps {
   value: string;
@@ -127,11 +123,6 @@ class PlainClipboard extends Clipboard {
 Quill.register('modules/clipboard', PlainClipboard, true);
 Quill.register("modules/resize", ResizeModule);
 Quill.register('modules/blotFormatter', BlotFormatter);
-// Quill.register({ 'modules/better-table': QuillBetterTable }, true)
-Quill.register({
-  'modules/tableUI': QuillTableUI
-}, true)
-//Quill.register('modules/clipboard', PlainClipboard, true);
 
 const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) => {
   const editorRef = useRef<any>();
@@ -156,49 +147,20 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
               [{ 'color': [] }, { 'background': [] }],
               [{ 'font': [] }],
               [{ 'align': [] }],
-              ['table'],
               ['clean']
             ],
 
           },
           // resize: {},
           blotFormatter: {},
-          'better-table': {
-            operationMenu: {
-              
-            },
-          },
-          tableUI: true,
         },
         placeholder: 'Compose an epic...',
 
       });
 
-    
-      // document.getElementById('insertTableBtn')?.addEventListener('click', () => {
-      //   const tableNode = document.createElement('table');
-      //   const tbody = document.createElement('tbody');
-      //   for (let i = 0; i < 3; i++) {
-      //     const row = document.createElement('tr');
-      //     for (let j = 0; j < 3; j++) {
-      //       const cell = document.createElement('td');
-      //       cell.textContent = ''; // Empty cell content
-      //       row.appendChild(cell);
-      //     }
-      //     tbody.appendChild(row);
-      //   }
-      //   tableNode.appendChild(tbody);
-      //   const range = quill.getSelection();
-      //   if (range) {
-      //     quill.clipboard.dangerouslyPasteHTML(range.index, tableNode.outerHTML);
-      //   }
-      // });
-
-
         if (value) {
           quill.clipboard.dangerouslyPasteHTML(value);
         }
-
 
         quill.on('text-change', () => {
           console.log("changed")
@@ -214,7 +176,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ value, onChange, readOnly }) 
           editorRef.current.destroy();
         }
       };
-    }, []);
+    }, [onChange, readOnly, value]);
 
 
     
