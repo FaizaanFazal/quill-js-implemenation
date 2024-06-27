@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useState } from 'react';
-import QuillEditor from '@/app/quill-editor/page';
+import QuillEditor from '@/app/quill-editor/QuillEditor';
 import { DeltaInsertOp, QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 
 const HomePage: React.FC = () => {
