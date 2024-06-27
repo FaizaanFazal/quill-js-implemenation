@@ -1,8 +1,10 @@
 "use client";
 import { useCallback, useState } from 'react';
-import QuillEditor from '@/app/quill-editor/QuillEditor';
 import { DeltaInsertOp, QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
-import NoSsr from './components/NoSsr';
+//import NoSsr from './components/NoSsr';
+import dynamic from 'next/dynamic';
+// Import QuillEditor dynamically to ensure it's only loaded on the client-side
+const QuillEditor = dynamic(() => import('@/app/quill-editor/QuillEditor'), { ssr: false });
 
 const HomePage: React.FC = () => {
   const [editorContent, setEditorContent] = useState<any>('');
@@ -86,9 +88,9 @@ const HomePage: React.FC = () => {
   return (
     <div className='min-h-screen p-5 m-5'>
       <h1>My Quill Editor in Next.js</h1>
-      <NoSsr>
+     
         <QuillEditor value={editorContent} onChange={handleEditorChange} readOnly={false} />
-      </NoSsr>
+      
       <div className=''>
         <div className=''>
           <h2>Editor Content</h2>
