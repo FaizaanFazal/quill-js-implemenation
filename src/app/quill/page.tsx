@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 
 const QuillEditor = dynamic(() => import('@/app/quill-editor/QuillEditor'), { ssr: false });
 
-
 export default  function QuillViewer() {
     const [editorContent, setEditorContent] = useState<any>('');
 
@@ -13,7 +12,6 @@ export default  function QuillViewer() {
         setEditorContent(content);
     }, []);
 
-    // Define your configuration options
     const cfg = {
         paragraphTag: 'div', // Use 'div' instead of the default 'p' tag
         encodeHtml: false, // Do not encode HTML characters
@@ -88,12 +86,10 @@ export default  function QuillViewer() {
         <div className='min-h-screen p-5 m-5'>
             <h1>My Quill Editor in Next.js</h1>
             <QuillEditor value={editorContent} onChange={handleEditorChange} readOnly={false} />
-            <div className=''>
-                <div className=''>
+                <div >
                     <h2>Editor Content</h2>
                     <div dangerouslySetInnerHTML={{ __html: html }} />
                 </div>
-            </div>
         </div>
     );
 
