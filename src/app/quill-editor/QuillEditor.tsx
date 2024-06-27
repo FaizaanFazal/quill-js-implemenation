@@ -7,7 +7,7 @@ import { Delta, Parchment } from 'quill/core';
 import Clipboard from 'quill/modules/clipboard';
 import ResizeModule from "@botom/quill-resize-module";
 import BlotFormatter from 'quill-blot-formatter';
-
+import dynamic from 'next/dynamic';
 
 interface QuillEditorProps {
   value: string;
